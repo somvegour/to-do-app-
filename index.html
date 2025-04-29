@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cartoon To-Do List</title>
+  <style>
+    body {
+      background: #fff7e6;
+      font-family: 'Comic Sans MS', cursive;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .box {
+      border: 3px dashed #ff9f1c;
+      background: #ffeab6;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .date-box {
+      font-size: clamp(16px, 4vw, 24px);
+      width: 100%;
+      max-width: 150px;
+      margin: 0 auto 20px;
+    }
+    .progress-box {
+      width: 100%;
+      margin: 20px auto;
+    }
+    .progress-bar {
+      height: 20px;
+      background: #f1f1f1;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      position: relative;
+    }
+    .progress {
+      height: 100%;
+      background: #00b894;
+      width: 0%;
+      transition: width 0.5s;
+    }
+    .progress-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      color: #2d3436;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .input-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+    input[type="text"], input[type="number"], select {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px dashed #fdcb6e;
+      border-radius: 10px;
+      flex-grow: 1;
+      background: #fff;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #55efc4;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+    button:hover {
+      background: #00b894;
+      transform: scale(1.05);
+    }
+    .shlok-box {
+      background: #fff1a8;
+      padding: 15px;
+      font-style: italic;
+      border-radius: 10px;
+      width: 100%;
+      margin: 15px auto;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(14px, 3vw, 18px);
+    }
+    .task-list {
+      margin-top: 15px;
+    }
+    .task {
+      background: #e0f7fa;
+      padding: 10px 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+      box-sizing: border-box;
+      flex-wrap: wrap;
+    }
+    .task:hover {
+      transform: translateX(5px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .task.done {
+      text-decoration: line-through;
+      background: #c8e6c9;
+      opacity: 0.8;
+    }
+    .days-left {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff7675;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .timer {
+      font-size: 14px;
+      color: #d63031;
+      font-weight: bold;
+      min-width: 80px;
+      text-align: center;
+    }
+    .timer-section {
+      margin-top: 15px;
+      text-align: center;
+    }
+    .big-timer {
+      font-size: clamp(20px, 6vw, 28px);
+      font-weight: bold;
+      color: #e17055;
+      margin: 10px 0;
+    }
+    .motivation {
+      font-size: clamp(16px, 4vw, 20px);
+      color: #6c5ce7;
+      font-weight: bold;
+      margin-top: 10px;
+      min-height: 30px;
+    }
+    .task-buttons {
+      display: flex;
+      gap: 5px;
+      margin-left: 10px;
+    }
+    .delete-btn {
+      background: #ff7675;
+    }
+    .delete-btn:hover {
+      background: #d63031;
+    }
+    .complete-btn {
+      background: #55efc4;
+    }
+    .complete-btn:hover {
+      background: #00b894;
+    }
+    .start-timer-btn {
+      background: #74b9ff;
+      margin-top: 10px;
+      width: 100%;
+    }
+    .start-timer-btn:hover {
+      background: #0984e3;
+    }
+    .hidden {
+      display: none;
+    }
+    .task-text {
+      flex-grow: 1;
+      text-align: left;
+      margin-right: 10px;
+      word-break: break-word;
+    }
+    /* Initial setup screen */
+    .setup-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 247, 230, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .setup-box {
+      background: #ffeab6;
+      border: 3px dashed #ff9f1c;
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .date-progress-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 15px;
+    }
+    .date-progress-container > div {
+      flex: 1;
+      min-width: 200px;
+    }
+    .timer-inputs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .timer-inputs input {
+      flex: 1;
+      min-width: 100px;
+    }
+    @media (max-width: 600px) {
+      .input-section {
+        flex-direction: column;
+      }
+      .task-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+        width: 100%;
+        justify-content: flex-end;
+      }
+      .task {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .timer-inputs {
+        flex-direction: column;
+      }
+      .timer-inputs input {
+        width: 100%;
+      }
+      .setup-box {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Initial Setup Screen -->
+  <div id="setupScreen" class="setup-screen">
+    <div class="setup-box">
+      <h2>Set Your Challenge Duration</h2>
+      <p>Enter the number of days you want to achieve your goals in:</p>
+      <div class="input-section">
+        <input type="number" id="achievementDay" placeholder="Enter number of days" min="1">
+      </div>
+      <button onclick="saveAchievementDay()">Start My Journey</button>
+      <p id="dayError" style="color:red; margin-top:10px; display:none;">Please enter a valid number of days (1 or more)</p>
+    </div>
+  </div>
+
+  <!-- Main App Content -->
+  <div class="container" id="mainContent">
+    <div class="days-left" id="daysLeft"></div>
+    
+    <!-- Date and Progress Container -->
+    <div class="date-progress-container">
+      <!-- Date Box -->
+      <div class="box date-box" id="dateBox">
+        Thursday <br><strong>13</strong><br>February
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="box progress-box">
+        Your Progress:
+        <div class="progress-bar">
+          <div class="progress" id="progressBar"></div>
+          <div class="progress-text" id="progressText">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Input -->
+    <div class="box">
+      <div class="input-section">
+        <input type="text" id="taskInput" placeholder="Write your task here">
+        <button onclick="addTask()">+</button>
+      </div>
+      <div id="taskAddedMessage" class="hidden" style="color:green; margin-top:5px;">Task added! Add more or set timer below.</div>
+    </div>
+
+    <!-- Timer Section -->
+    <div class="box timer-section" id="timerSection">
+      <h3>Set Your Challenge Timer</h3>
+      <div class="timer-inputs">
+        <input type="number" id="hoursInput" placeholder="Hours" min="0" max="24">
+        <input type="number" id="minutesInput" placeholder="Minutes" min="0" max="59">
+      </div>
+      <button class="start-timer-btn" onclick="startChallengeTimer()">Start Challenge</button>
+      <div id="challengeTimer" class="big-timer hidden">00:00:00</div>
+      <div id="motivationText" class="motivation"></div>
+    </div>
+
+    <!-- Random Shlok (auto-changing daily) -->
+    <div class="box shlok-box" id="shlokBox">श्लोक आएगा यहाँ</div>
+
+    <!-- Task List -->
+    <div id="taskListContainer" class="box hidden">
+      <h3>Your Tasks:</h3>
+      <div class="task-list" id="taskList"></div>
+    </div>
+  </div>
+<div class="index3">
+    <button onclick="window.location.href='index2.html'">View Completed Tasks</button>
+  </div>
+  <script>
+    const shloks = [
+      "कर्म करते रहो, फल की चिंता मत करो। (परिणाम खुद मिलेगा।)",
+      "जो आज करता है वही कल जीतता है। (सदैव कर्मशील बनो।)",
+      "अपने कर्तव्यों का पालन करो, सफलता अपने आप मिलेगी।",
+      "संघर्ष के बिना कुछ नहीं मिलता। (धैर्य रखो।)",
+      "हर छोटा कदम बड़ी सफलता की ओर ले जाता है।",
+      "असफलता सफलता की पहली सीढ़ी है।",
+      "जो डटा रहता है, वही जीतता है।",
+      "मेहनत कभी व्यर्थ नहीं जाती।"
+    ];
+
+    const motivationalMessages = [
+      "Great job! You completed all tasks on time! 🎉",
+      "Well done buddy! You're a productivity master! 💪",
+      "Amazing! You crushed your goals today! 👏",
+      "Success looks good on you! Keep it up! 🌟",
+      "You're unstoppable! What an achievement! 🚀",
+      "Task master! You completed everything perfectly! 🏆",
+      "Time management pro! You nailed it! ⏱️",
+      "Productivity champion! You're on fire today! 🔥",
+      "Incredible focus! You achieved all your goals! 🎯",
+      "Perfect execution! You're a goal-crushing machine! 💯",
+      "You didn't complete all tasks, but don't give up! Tomorrow is a new day!",
+      "Some tasks remain, but you made progress! Keep going!",
+      "Partial success is still success! Try again tomorrow!",
+      "You completed some tasks - that's better than nothing!",
+      "Rome wasn't built in a day! Keep working at it!",
+      "Every attempt makes you stronger! Try again!",
+      "Failure is just practice for success! Don't stop!",
+      "You're closer than you were yesterday! Keep pushing!",
+      "Progress, not perfection! You'll do better next time!",
+      "The path to success has bumps - keep walking it!"
+    ];
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+    let challengeTimerInterval;
+    let remainingChallengeSeconds = 0;
+    let challengeActive = false;
+
+    // Initialize the app
+    function init() {
+      updateDate();
+      loadCompletedTasksCount();
+      checkFirstTimeUser();
+      updateDailyShlok();
+      updateDaysLeft();
+    }
+
+    function checkFirstTimeUser() {
+      const achievementDay = localStorage.getItem('achievementDay');
+      if (!achievementDay) {
+        document.getElementById('setupScreen').style.display = 'flex';
+        document.getElementById('mainContent').style.display = 'none';
+      } else {
+        document.getElementById('setupScreen').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+      }
+    }
+
+    function saveAchievementDay() {
+      const dayInput = document.getElementById('achievementDay');
+      const selectedDay = parseInt(dayInput.value);
+      
+      if (isNaN(selectedDay) ){
+        dayInput.value = '';
+        dayInput.focus();
+        document.getElementById('dayError').style.display = 'block';
+        return;
+      }
+      
+      if (selectedDay < 1) {
+        dayInput.value = '';
+        dayInput.focus();
+        document.getElementById('dayError').style.display = 'block';
+        return;
+      }
+      
+      document.getElementById('dayError').style.display = 'none';
+      
+      const startDate = new Date().toISOString();
+      
+      localStorage.setItem('achievementDay', selectedDay);
+      localStorage.setItem('challengeStartDate', startDate);
+      
+      document.getElementById('setupScreen').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      
+      updateDaysLeft();
+      showRandomShlok();
+    }
+
+    function updateDaysLeft() {
+      const achievementDay = parseInt(localStorage.getItem('achievementDay'));
+      const startDate = new Date(localStorage.getItem('challengeStartDate'));
+      
+      if (!achievementDay || !startDate) return;
+      
+      const today = new Date();
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + achievementDay);
+      
+      // Calculate days left
+      const timeDiff = endDate - today;
+      const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      
+      if (daysLeft > 0) {
+        document.getElementById('daysLeft').textContent = `${daysLeft} Days Left`;
+      } else if (daysLeft === 0) {
+        document.getElementById('daysLeft').textContent = "Last Day!";
+      } else {
+        document.getElementById('daysLeft').textContent = "Challenge Completed!";
+      }
+    }
+
+    function updateDailyShlok() {
+      // Get today's date as a unique number (e.g., 20230417 for April 17, 2023)
+      const today = new Date();
+      const dateNum = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+      
+      // Use the date to select a consistent daily shlok
+      const shlokIndex = dateNum % shloks.length;
+      document.getElementById("shlokBox").innerText = "आज का श्लोक: " + shloks[shlokIndex];
+    }
+
+    function showRandomShlok() {
+      const random = shloks[Math.floor(Math.random() * shloks.length)];
+      document.getElementById("shlokBox").innerText = "श्लोक: " + random;
+    }
+
+    function updateProgress() {
+      const percent = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+      document.getElementById("progressBar").style.width = percent + "%";
+      document.getElementById("progressText").innerText = percent + "%";
+    }
+
+    function addTask() {
+      const taskInput = document.getElementById("taskInput");
+      const taskText = taskInput.value.trim();
+
+      if (!taskText) return;
+
+      const taskList = document.getElementById("taskList");
+      const task = document.createElement("div");
+      task.className = "task";
+
+      const taskTextSpan = document.createElement("span");
+      taskTextSpan.className = "task-text";
+      taskTextSpan.textContent = taskText;
+      task.appendChild(taskTextSpan);
+
+      const taskButtons = document.createElement("div");
+      taskButtons.className = "task-buttons";
+
+      const completeBtn = document.createElement("button");
+      completeBtn.className = "complete-btn";
+      completeBtn.innerText = "✔";
+      completeBtn.onclick = () => {
+        if (!task.classList.contains("done")) {
+          task.classList.add("done");
+          completedTasks++;
+          updateProgress();
+          saveCompletedTask(taskText);
+          if (challengeActive && checkAllTasksCompleted()) {
+            endChallenge(true);
+          }
+        }
+      };
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.innerText = "✖";
+      deleteBtn.onclick = () => {
+        if (!task.classList.contains("done")) {
+          totalTasks--;
+        } else {
+          completedTasks--;
+        }
+        task.remove();
+        updateProgress();
+      };
+
+      taskButtons.appendChild(completeBtn);
+      taskButtons.appendChild(deleteBtn);
+      task.appendChild(taskButtons);
+
+      taskList.appendChild(task);
+
+      taskInput.value = "";
+      totalTasks++;
+      updateProgress();
+      
+      document.getElementById("taskAddedMessage").classList.remove("hidden");
+      document.getElementById("taskListContainer").classList.remove("hidden");
+      
+      setTimeout(() => {
+        document.getElementById("taskAddedMessage").classList.add("hidden");
+      }, 2000);
+    }
+
+    function startChallengeTimer() {
+      const hours = parseInt(document.getElementById("hoursInput").value) || 0;
+      const minutes = parseInt(document.getElementById("minutesInput").value) || 0;
+      
+      if (hours === 0 && minutes === 0) {
+        alert("Please set a valid time for the challenge!");
+        return;
+      }
+      
+      if (totalTasks === 0) {
+        alert("Please add some tasks first!");
+        return;
+      }
+      
+      remainingChallengeSeconds = (hours * 3600) + (minutes * 60);
+      challengeActive = true;
+      
+      document.getElementById("hoursInput").disabled = true;
+      document.getElementById("minutesInput").disabled = true;
+      document.querySelector(".start-timer-btn").disabled = true;
+      document.getElementById("challengeTimer").classList.remove("hidden");
+      document.querySelector("#timerSection h3").style.display = "none";
+      document.querySelector(".timer-inputs").style.display = "none";
+
+      updateChallengeTimerDisplay();
+      
+      challengeTimerInterval = setInterval(() => {
+        remainingChallengeSeconds--;
+        updateChallengeTimerDisplay();
+        
+        if (remainingChallengeSeconds <= 0) {
+          endChallenge(false);
+        }
+      }, 1000);
+    }
+    
+    function updateChallengeTimerDisplay() {
+      const hours = Math.floor(remainingChallengeSeconds / 3600);
+      const minutes = Math.floor((remainingChallengeSeconds % 3600) / 60);
+      const seconds = remainingChallengeSeconds % 60;
+      
+      document.getElementById("challengeTimer").textContent = 
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    function endChallenge(success) {
+      clearInterval(challengeTimerInterval);
+      challengeActive = false;
+      
+      const motivationText = document.getElementById("motivationText");
+      
+      if (success) {
+        // Get random success message
+        const randomIndex = Math.floor(Math.random() * (motivationalMessages.length/2));
+        motivationText.textContent = motivationalMessages[randomIndex];
+        motivationText.style.color = "#00b894";
+      } else {
+        // Get random try again message
+        const randomIndex = Math.floor(Math.random() * (motivationalMessages.length/2)) + (motivationalMessages.length/2);
+        motivationText.textContent = motivationalMessages[randomIndex];
+        motivationText.style.color = "#d63031";
+      }
+      
+      document.querySelector("#timerSection h3").style.display = "block";
+      document.querySelector(".timer-inputs").style.display = "flex";
+      document.querySelector(".start-timer-btn").style.display = "block";
+
+      // Re-enable timer inputs
+      document.getElementById("hoursInput").disabled = false;
+      document.getElementById("minutesInput").disabled = false;
+      document.querySelector(".start-timer-btn").disabled = false;
+    }
+    
+    function checkAllTasksCompleted() {
+      return completedTasks === totalTasks;
+    }
+    
+    function saveCompletedTask(task) {
+      // Save to localStorage for current session
+      let saved = JSON.parse(localStorage.getItem("completedTasks")) || [];
+      saved.push(task);
+      localStorage.setItem("completedTasks", JSON.stringify(saved));
+      
+      // Save to index3.html for permanent storage
+      saveToPermanentStorage(task);
+    }
+    
+    function saveToPermanentStorage(task) {
+      // This would typically be done with server-side code or a database
+      // For demonstration, we'll use localStorage to simulate permanent storage
+      let permanentTasks = JSON.parse(localStorage.getItem("permanentTasks")) || [];
+      permanentTasks.push({
+        task: task,
+        date: new Date().toLocaleDateString()
+      });
+      localStorage.setItem("permanentTasks", JSON.stringify(permanentTasks));
+      
+      // Update the completed tasks count
+      updateCompletedTasksCount();
+    }
+    
+    function updateCompletedTasksCount() {
+      let permanentTasks = JSON.parse(localStorage.getItem("permanentTasks")) || [];
+      let count = permanentTasks.length;
+      localStorage.setItem("completedTasksCount", count);
+    }
+    
+    function loadCompletedTasksCount() {
+      let count = localStorage.getItem("completedTasksCount") || 0;
+      // You could display this count somewhere in your UI if needed
+    }
+    
+    function updateDate() {
+      const d = new Date();
+      const options = { weekday: 'long', month: 'long' };
+      document.getElementById("dateBox").innerHTML = 
+        `${d.toLocaleDateString("hi-IN", { weekday: 'long' })}<br><strong>${d.getDate()}</strong><br>${d.toLocaleDateString("hi-IN", { month: 'long' })}`;
+    }
+
+    // Initialize the app when the page loads
+    window.onload = init;
+  </script>
+</body>
+</html>
